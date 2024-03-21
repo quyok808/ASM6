@@ -1,0 +1,49 @@
+﻿@model IEnumerable<ASM6.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (User.Identity.IsAuthenticated) // Kiểm tra xem người dùng đã đăng nhập hay chưa
+{
+	<div class="row">
+		<div class="col-md-12">
+
+			<button class="prev slick-arrow">
+				<i class="icon icon-arrow-left"></i>
+			</button>
+
+			<div class="main-slider pattern-overlay">
+				@{
+					foreach (var item in Model)
+					{
+						<div class="slider-item">
+							<div class="banner-content">
+								<h2 class="banner-title">@item.Title</h2>
+								<p>
+									@item.Description
+								</p>
+								<div class="btn-wrap">
+									<a href="/Book/Details/@item.ID" class="btn btn-outline-accent btn-accent-arrow">
+										Read More<i class="icon icon-ns-arrow-right"></i>
+									</a>
+								</div>
+							</div><!--banner-content-->
+							<img src="../imgs/@item.Image" alt="banner" class="banner-image" width="395px" height="572px">
+						</div>
+
+						<!--slider-item-->
+					}
+				}
+
+			</div><!--slider-->
+
+			<button class="next slick-arrow">
+				<i class="icon icon-arrow-right"></i>
+			</button>
+
+		</div>
+	</div>
+}
+

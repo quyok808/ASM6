@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<CustomUser> SignInManager
+@inject UserManager<CustomUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="menu-item active">@Html.ActionLink("Trang chủ", "Index", "Home")</li>
+
+    <li class="menu-item">@Html.ActionLink("List Book", "Index", "Book")</li>
+
+    <li class="menu-item">@Html.ActionLink("List Categories", "Index", "Categories")</li>
+
+    <li class="menu-item">
+        @{
+            var user = await UserManager.GetUserAsync(User);
+            var fullName = user?.FullName;
+        }
+        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @fullName!</a>
+    </li>
+
+    <li class="menu-item">
+        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button style="margin-bottom: -25px" type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="menu-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+    </li>
+    <li class="menu-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    </li>
+}
