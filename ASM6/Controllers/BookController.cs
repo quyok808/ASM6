@@ -46,7 +46,7 @@ namespace ASM6.Controllers
                 return NotFound();
             }
 
-            var book = await _context.Books
+            var book = await _context.Books 
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (book == null)
