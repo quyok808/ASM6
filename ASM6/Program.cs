@@ -1,4 +1,4 @@
-﻿using ASM6.Data;
+using ASM6.Data;
 using ASM6.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +14,7 @@ builder.Services.AddDbContext<BookDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<CustomUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<BookDbContext>();
 builder.Services.AddControllersWithViews();
 

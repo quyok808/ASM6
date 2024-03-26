@@ -30,13 +30,15 @@ namespace ASM6.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<CustomUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<CustomUser> userManager,
             IUserStore<CustomUser> userStore,
             SignInManager<CustomUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +46,7 @@ namespace ASM6.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -76,9 +79,9 @@ namespace ASM6.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [Display(Name = "Username")]
-            [StringLength(20, ErrorMessage = "Username chỉ được tối đa 20 kí tự !!!")]
-            public string Username { get; set; }
+            [EmailAddress]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -100,10 +103,17 @@ namespace ASM6.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
 
             [Required]
+            
             [Display(Name = "Fullname")]
             public string Fullname { get; set; }
 
             [Required]
+
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+
+            [Required]
+
             [Display(Name = "Address")]
             public string Address { get; set; }
         }
@@ -125,15 +135,39 @@ namespace ASM6.Areas.Identity.Pages.Account
                 user.FullName = Input.Fullname;
                 user.Address = Input.Address;
                 await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
-
+                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
+                    if (!_roleManager.RoleExistsAsync("Member").Result)
+                    {
+                        _roleManager.CreateAsync(new IdentityRole("Member")).Wait();
+                    }
+                    await _userManager.AddToRoleAsync(user, "Member");
                     _logger.LogInformation("User created a new account with password.");
 
-                    return RedirectToPage("Login");
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        protocol: Request.Scheme);
 
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
                 }
                 foreach (var error in result.Errors)
                 {
