@@ -4,12 +4,12 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="menu-item active">@Html.ActionLink("Trang chủ", "Index", "Home")</li>
+    if (User.IsInRole("Admin"))
+    {
+        <li class="menu-item">@Html.ActionLink("List Book", "Index", "Book")</li>
 
-    <li class="menu-item">@Html.ActionLink("List Book", "Index", "Book")</li>
-
-    <li class="menu-item">@Html.ActionLink("List Categories", "Index", "Categories")</li>
-
+        <li class="menu-item">@Html.ActionLink("List Categories", "Index", "Categories")</li>
+    }
     <li class="menu-item">
         @{
             var user = await UserManager.GetUserAsync(User);

@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASM6.Data;
 using ASM6.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ASM6.Controllers
 {
+    [Authorize(Roles ="Admin")]
     public class CategoriesController : Controller
     {
         private readonly BookDbContext _context;

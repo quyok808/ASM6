@@ -19,15 +19,20 @@ namespace ASM6.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Books.ToListAsync());
+			TempData["ListCategory"] = await _context.Categories.ToListAsync();
+			TempData["ListBook"] = await _context.Books.ToListAsync();
+			return View(await _context.Books.ToListAsync());
         }
 
-        public IActionResult Privacy()
-        {
-            return View();  
-        }
+		public async Task<IActionResult> Index_category(int id)
+		{
+			TempData["ListCategory"] = await _context.Categories.ToListAsync();
+			TempData["ListBook"] = await _context.Books.ToListAsync();
+			List<Book>? books = await _context.Books.Where(p => p.CategoryId == id).ToListAsync();
+			return View(books);
+		}
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
