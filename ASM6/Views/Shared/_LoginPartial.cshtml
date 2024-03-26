@@ -10,6 +10,8 @@
 
         <li class="menu-item">@Html.ActionLink("List Categories", "Index", "Categories")</li>
     }
+    <li class="menu-item">@Html.ActionLink("Giỏ hàng", "Index", "Cart")</li>
+
     <li class="menu-item">
         @{
             var user = await UserManager.GetUserAsync(User);

@@ -37,7 +37,7 @@
 													justify-content: center; /* Căn giữa theo chiều ngang */
 													font-size: 25px;
 													color: black;">
-							@Html.ActionLink("ONLYA-BOOKSTORE","Index","Home")
+							@Html.ActionLink("ONLYA-BOOKSTORE", "Index", "Home")
 						</div>
 					</div>
 
@@ -48,7 +48,7 @@
 								<ul class="menu-list">
 									<partial name="_LoginPartial" />
 								</ul>
-								
+
 								<div class="hamburger">
 									<span class="bar"></span>
 									<span class="bar"></span>
@@ -67,26 +67,28 @@
 	</div><!--header-wrap-->
 	<section id="billboard">
 		<div class="container">
-			<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-				<div class="container-fluid">
-					<ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-						@{
-							List<Category> listCate = TempData["ListCategory"] as List<Category>;
-							List<Book> listBook = TempData["ListBook"] as List<Book>;
-							if (listCate != null)
-							{
-								foreach (var item in listCate)
+			
+				<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+					<div class="container-fluid">
+						<ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+							@{
+								List<Category> listCate = TempData["ListCategory"] as List<Category>;
+								List<Book> listBook = TempData["ListBook"] as List<Book>;
+								if (listCate != null)
 								{
-									int sl = listBook.Where(p => p.CategoryId == item.Id).Count();
-									<li class="nav-item">@Html.ActionLink(@item.Name + " (" + sl.ToString() + ")", "Index_category", "Home", new { id = @item.Id }, new {@style = "margin-left: 20px;"})</li>
-									<li class ="nav-item"> </li>
+									foreach (var item in listCate)
+									{
+										int sl = listBook.Where(p => p.CategoryId == item.Id).Count();
+										<li class="nav-item">@Html.ActionLink(@item.Name + " (" + sl.ToString() + ")", "Index_category", "Home", new { id = @item.Id }, new { @style = "margin-left: 20px;" })</li>
+										<li class="nav-item"> </li>
+									}
 								}
 							}
-						}
-					</ul>
-				</div>
-			</nav>
-			<hr />
+						</ul>
+					</div>
+				</nav>
+				<hr />
+			
 			@RenderBody()
 		</div>
 	</section>

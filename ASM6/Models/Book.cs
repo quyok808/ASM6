@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace ASM6.Models
 {
@@ -14,7 +15,7 @@ namespace ASM6.Models
         public int? Price { get; set; }
 
         public int CategoryId { get; set; }
-
+        [ValidateNever]
         public virtual required Category? Category { get; set; }
     }
 }

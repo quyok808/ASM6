@@ -1,5 +1,6 @@
 using ASM6.Data;
 using ASM6.Models;
+using ASM6.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,16 @@ builder.Services.AddDbContext<BookDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+
+builder.Services.AddSingleton<IBookCart,BookCartRepo>();
+builder.Services.AddSingleton<BookCartRepo>();
+
+
 builder.Services.AddDefaultIdentity<CustomUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<BookDbContext>();
 builder.Services.AddControllersWithViews();
+
 
 var app = builder.Build();
 

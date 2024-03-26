@@ -145,6 +145,11 @@ namespace ASM6.Controllers
             var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
+                List<Book>? books_del = _context.Books.Where(book => book.CategoryId == id).ToList();
+                foreach(var book in books_del)
+                {
+                    _context.Books.Remove(book);
+                }
                 _context.Categories.Remove(category);
             }
 

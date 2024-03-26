@@ -1,10 +1,12 @@
-﻿namespace ASM6.Models
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace ASM6.Models
 {
     public class Category
     {
         public int Id { get; set; }
         public string? Name { get; set; }
-
-        public virtual ICollection<Book> Books { get; set; }
+		[ValidateNever]
+		public virtual ICollection<Book> Books { get; set; }
     }
 }

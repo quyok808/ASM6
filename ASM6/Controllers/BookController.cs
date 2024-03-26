@@ -27,8 +27,9 @@ namespace ASM6.Controllers
         // GET: Book
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Books.ToListAsync());
+            return View(await _context.Books.Include(b => b.Category).ToListAsync());
         }
+
 
         public async Task<IActionResult> Index_Category(int id)
         {
@@ -39,6 +40,7 @@ namespace ASM6.Controllers
         }
 
         // GET: Book/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             TempData["ListCategory"] = await _context.Categories.ToListAsync();

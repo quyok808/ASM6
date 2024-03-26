@@ -8,18 +8,21 @@ using Microsoft.EntityFrameworkCore;
 using ASM6.Data;
 using ASM6.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Hosting;
 
 namespace ASM6.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles ="Admin")]
     public class BooksController : Controller
     {
         private readonly BookDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public BooksController(BookDbContext context)
+        public BooksController(BookDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // GET: Admin/Books
@@ -51,7 +54,7 @@ namespace ASM6.Areas.Admin.Controllers
         // GET: Admin/Books/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
             return View();
         }
 
@@ -60,15 +63,38 @@ namespace ASM6.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Title,Author,Description,Image,Price,CategoryId")] Book book)
+        public async Task<IActionResult> Create(Book book, IFormFile FileUpLoad)
         {
+            ModelState.Remove("FileUpLoad");
             if (ModelState.IsValid)
             {
+                int bookid;
+                if (_context.Books.Any())
+                {
+                    bookid = _context.Books.Max(p => p.ID) + 1;
+                }
+                else
+                {
+                    // Nếu không có bản ghi nào trong bảng Books, bạn có thể gán bookid bằng 1 hoặc giá trị mặc định của bạn.
+                    bookid = 1;
+                }
+                book.ID = bookid;
+                if (FileUpLoad != null && FileUpLoad.Length > 0)
+                {
+                    var UploadFolder = Path.Combine(_environment.WebRootPath, "imgs");
+                    var filePath = Path.Combine(UploadFolder, book.ID + ".jpg");
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await FileUpLoad.CopyToAsync(fileStream);
+                    }
+                }
+                book.Image = book.ID + ".jpg";
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", book.CategoryId);
             return View(book);
         }
 
@@ -85,7 +111,7 @@ namespace ASM6.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", book.CategoryId);
             return View(book);
         }
 
@@ -94,17 +120,28 @@ namespace ASM6.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,Author,Description,Image,Price,CategoryId")] Book book)
+        public async Task<IActionResult> Edit(int id,Book book, IFormFile FileUpLoad)
         {
             if (id != book.ID)
             {
                 return NotFound();
             }
-
+            ModelState.Remove("FileUpLoad");
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (FileUpLoad != null && FileUpLoad.Length > 0)
+                    {
+                        var UploadFolder = Path.Combine(_environment.WebRootPath, "imgs");
+                        var filePath = Path.Combine(UploadFolder, book.ID + ".jpg");
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await FileUpLoad.CopyToAsync(fileStream);
+                        }
+                    }
+                    book.Image = book.ID + ".jpg";
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
@@ -121,7 +158,7 @@ namespace ASM6.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", book.CategoryId);
             return View(book);
         }
 
